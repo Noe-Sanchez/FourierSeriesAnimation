@@ -1,4 +1,6 @@
 //class for spacial coordinates
+import java.util.*;
+
 public class fourier_point {
   float y, x, r;
   int l;
@@ -7,8 +9,8 @@ public class fourier_point {
     r = r_speed;
   }
   void doPos(){
-    x = l*cos(r*angle);
-    y = l*sin(r*angle);
+    x = (l*cos(r*angle))/r;
+    y = (l*sin(r*angle))/r;
   }
 }
 
@@ -23,13 +25,6 @@ void concat(){
   
 }
 
-void setup() {
-  frameRate(800);
-  size(1000, 800);
-  clear();
-  pix = get();
-}
-
 boolean sw = false;
 boolean ps = false;
 boolean husw = true;
@@ -38,22 +33,33 @@ float center_x = 600;
 float center_y = 400;
 float hue = 0;
 processing.core.PImage pix;
+List<fourier_point> fourier_exp = new ArrayList<fourier_point>();
 
-fourier_point v1 = new fourier_point(2, 50);
-fourier_point v2 = new fourier_point(3, 100);
-fourier_point v3 = new fourier_point(5, 100);
+fourier_point v1 = new fourier_point(1, 100);
+fourier_point v2 = new fourier_point(2, 100);
+fourier_point v3 = new fourier_point(3, 100);
 
-fourier_point[] fourier_exp = {v1, v2, v3};
+void setup() {
+  frameRate(800);
+  size(1000, 800);
+  clear();
+  pix = get();
+  
+  fourier_exp.add(v1);
+  fourier_exp.add(v2);
+  fourier_exp.add(v3);
+  
+}
 
 void draw() {
   
   image(pix, -1, 0);
   noStroke();
   
-  v1.doPos();
-  v2.doPos();
-  v3.doPos();
-  
+  int arr_size = fourier_exp.size();
+  for(int i = 0; i < arr_size; i++){
+    fourier_exp.get(i).doPos();
+  }
   //toggle rgb
   if (husw == true) {
     colorMode(HSB);
@@ -68,7 +74,7 @@ void draw() {
   
   //toggle pause
   if (ps == false) {
-    angle = angle - 0.005;
+    angle = angle - 0.05;
   }
   noStroke();
   ocircle(center_x, v2.y+v1.y+center_y, 0, v3.y, 20);
