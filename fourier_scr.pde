@@ -2,13 +2,20 @@
 import java.util.*;
 
 public class fourier_point {
-  float y, x, r;
-  fourier_point(float r_speed) {
+  float y, x, r, d;
+  int s;
+  
+  fourier_point(float r_speed, int sense, float denom) {
     r = r_speed;
+    s = sense;
+    d = denom;
   }
+  
+   //coordinate definition
   void doPos(){
-    x = (longg*cos(r*angle))/(r);
-    y = (longg*sin(r*angle))/(r);
+    x = (longg*cos(s*r*angle))/(d);
+    y = (longg*sin(s*r*angle))/(d);
+    
   }
 }
 
@@ -19,13 +26,14 @@ void ocircle(float originx, float originy, float x, float y, float o_width) {
 void oline(float originx, float originy, float x1, float y1, float x2, float y2) {
   line(x1+originx, y1+originy, x2+originx, y2+originy);
 }
-void concat(){
-  
-}
 
+//switch variables
 boolean sw = true;
 boolean ps = false;
 boolean husw = true;
+boolean movsw = false;
+
+//math stuff
 float angle = 0;
 float center_x = 600;
 float center_y = 400;
@@ -35,48 +43,52 @@ public int longg = 100;
 processing.core.PImage pix;
 List<fourier_point> fourier_exp = new ArrayList<fourier_point>();
 
-fourier_point v1 = new fourier_point(1);
-fourier_point v2 = new fourier_point(2);
-fourier_point v3 = new fourier_point(3);
-fourier_point v4 = new fourier_point(4);
-fourier_point v5 = new fourier_point(5);
-fourier_point v6 = new fourier_point(6);
-fourier_point v7 = new fourier_point(7);
-fourier_point v8 = new fourier_point(8);
-fourier_point v9 = new fourier_point(9);
-fourier_point v10 = new fourier_point(10);
-fourier_point v11 = new fourier_point(11);
-fourier_point v12 = new fourier_point(12);
-fourier_point v13 = new fourier_point(13);
-fourier_point v14 = new fourier_point(14);
-
 void setup() {
+  
   frameRate(800);
   size(1000, 800);
   clear();
   pix = get();
   
-  fourier_exp.add(v1);
-  fourier_exp.add(v2);
-  fourier_exp.add(v3);
-  fourier_exp.add(v4);
-  fourier_exp.add(v5);
-  fourier_exp.add(v6);
-  fourier_exp.add(v7);
-  fourier_exp.add(v8);
-  fourier_exp.add(v9);
-  fourier_exp.add(v10);
-  fourier_exp.add(v11);
-  fourier_exp.add(v12);
-  fourier_exp.add(v13);
-  fourier_exp.add(v14);
+  //Wave definitions, uncomment to change
+  
+  //square
+  for (int i = 1; i<=5;i += 2){
+    fourier_exp.add(new fourier_point(i,1,i));
+  }
+  
+  //sawtooth
+  //for (int i = 1; i<=5;i++){
+  //  fourier_exp.add(new fourier_point(i,1,i));
+  //}
+  
+  //triangular
+  //for (int i = 1; i<=5;i += 2){
+  //  if(i % 3 == 0){
+  //    fourier_exp.add(new fourier_point(i,-1,(i*i)));
+  //  }else{
+  //    fourier_exp.add(new fourier_point(i,1,(i*i)));
+  //  }
+  //}
+  
+  //sine
+  //for (int i=1; i<=3; i++){
+  //  fourier_exp.add(new fourier_point(1,1,2));
+  //}
+  
 }
 
 void draw() {
   
-  image(pix, -1, 0);
+  //Toggle static or moving line
+  if (movsw == true) {
+    image(pix, 0, 0);
+  }else{
+    image(pix, -1, 0);
+  }
   noStroke();
-  //toggle rgb
+  
+  //Toggle rgb
   if (husw == true) {
     colorMode(HSB);
     fill(hue, 360, 360);
@@ -88,54 +100,75 @@ void draw() {
     fill(#0000FF);
   }
   
-  //toggle pause
+  //Toggle pause
   if (ps == false) {
     angle = angle - dta;
   }
-  float eval = 0;
-  int arr_size = fourier_exp.size();
-  for(int i = 0; i < arr_size; i++){
-    fourier_exp.get(i).doPos();
-    eval = eval + fourier_exp.get(i).y;
-  }
-  noStroke();
-  ocircle(center_x, center_y+eval, 0,0, 20);
   
+  //Actually do the series
+  float evalx = 0; float evaly = 0; 
+  for(int i = 0; i < fourier_exp.size(); i++){
+    fourier_exp.get(i).doPos();
+    evaly = evaly + fourier_exp.get(i).y;
+    evalx = evalx + fourier_exp.get(i).x;
+  }
+  
+  //Main plot circle
+  if (movsw == true){
+    ocircle(center_x+evalx, center_y+evaly, 0,0, 20);
+  }else{
+    ocircle(center_x, center_y+evaly, 0,0, 20);
+  }
+  
+  //Store pixels for next iteration
   loadPixels();
   pix = get();
   updatePixels();
   
+  //Toggle skeleton
   if (sw == true) {
     noFill();
     strokeWeight(5);
     stroke(hue, 360, 360, 50);
     float sumx = 0;
     float sumy = 0;
-    for(int i=0; i < arr_size; i++){
+    
+    //Print intermediate vectors
+    for(int i=0; i < fourier_exp.size(); i++){
       oline(center_x+sumx, center_y+sumy, fourier_exp.get(i).x, fourier_exp.get(i).y, 0, 0);
       sumx = sumx + fourier_exp.get(i).x;
       sumy = sumy + fourier_exp.get(i).y;
       ocircle(center_x+sumx, center_y+sumy, 0, 0,20);
-      //ocircle(center_x+sumx, center_y+sumy, 0, 0, sqrt((fourier_exp.get(i).x*fourier_exp.get(i).x)+(fourier_exp.get(i).y*fourier_exp.get(i).y)));
       }
-    oline(center_x, center_y, sumx, sumy,  0, sumy);
+      if (movsw==false){
+        oline(center_x, center_y, sumx, sumy,  0, sumy);
+      }
   }
 }
 
-//inputs
+//Key inputs
 void keyPressed() {
-  //show skeleton
+  //Show skeleton
   if (key == 'k') {
     clear();
     sw = !sw;
   }
-  //pause
-  if (key == 'p') {
+  //Pause
+  if (key == 'j') {
     clear();
     ps = !ps;
   }
-  //toggle rgb
+  //Toggle rgb
   if (key == 'h') {
     husw = !husw;
+  }
+  //Toggle line movement
+  if (key == 'l') {
+    background(0,0,0,100);
+    loadPixels();
+    pix = get();
+    updatePixels();
+  
+    movsw = !movsw;
   }
 }
