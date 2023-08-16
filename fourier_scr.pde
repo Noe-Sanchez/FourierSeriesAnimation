@@ -46,21 +46,22 @@ List<fourier_point> fourier_exp = new ArrayList<fourier_point>();
 void setup() {
   
   frameRate(800);
-  size(1000, 800);
-  clear();
+  size(1000, 700);
+  //clear();
+  background(#000000);
   pix = get();
   
   //Wave definitions, uncomment to change
   
   //square
-  for (int i = 1; i<=5;i += 2){
+  /*for (int i = 1; i<=5;i += 2){
     fourier_exp.add(new fourier_point(i,1,i));
-  }
+  }*/
   
   //sawtooth
-  //for (int i = 1; i<=5;i++){
-  //  fourier_exp.add(new fourier_point(i,1,i));
-  //}
+  for (int i = 1; i<=5;i++){
+    fourier_exp.add(new fourier_point(i,1,i));
+  }
   
   //triangular
   //for (int i = 1; i<=5;i += 2){
@@ -136,6 +137,7 @@ void draw() {
     //Print intermediate vectors
     for(int i=0; i < fourier_exp.size(); i++){
       oline(center_x+sumx, center_y+sumy, fourier_exp.get(i).x, fourier_exp.get(i).y, 0, 0);
+      circle(center_x+sumx, center_y+sumy, 2*sqrt(pow(fourier_exp.get(i).x,2) + pow(fourier_exp.get(i).y,2)));
       sumx = sumx + fourier_exp.get(i).x;
       sumy = sumy + fourier_exp.get(i).y;
       ocircle(center_x+sumx, center_y+sumy, 0, 0,20);
